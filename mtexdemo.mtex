@@ -1,0 +1,225 @@
+Needs["MathTeX`"];
+(* << JavaGraphics`; *)
+(* TeXDependence only execute when running as batch *)
+TeXDependence[$thisfile = "mtexdemo.mtex"]; 
+TeXStrip["mtexdemo"];
+(*TeX[ ex_] := Module[{},
+	ex = Exp[ 3 yvar / h[x] ]   ;
+	newexp = Map[ TeX, ex , Infinity ];
+	Return[ newexp ]
+	];
+*)
+(** FILE=mtexdemo.tex **)
+(**
+
+\documentclass[titlepage,oneside,11pt,a4paper,notitlepage,openany]{article}
+\usepackage{cite,drop,epsf,amssymb,fancyheadings,color,makeidx, graphicx }
+\usepackage[margin=1in]{geometry}
+\usepackage{layout}
+\usepackage{showframe}
+\setlength{\parskip}{\baselineskip}%
+\input{mlistings}
+\newcommand{\filename}{}
+\newcommand{\lastlineno}{0}
+\usepackage[formats]{listings}
+\begin{document}
+%
+% since unparsed variables are passed as
+\newcommand{\text}[1]{ \; { (#1) } }
+%
+%
+\raggedbottom
+\lstloadlanguages{Mathematica}
+\lstset{language=Mathematica,frame=single,basicstyle=\scriptsize,
+linewidth=14cm, xleftmargin=5mm,xrightmargin=30mm}
+%\setlength{\parindent}{.5cm}
+%\pagenumbering{arabic}\setcounter{page}{1}
+\pagestyle{fancy}
+\setcounter{page}{1}
+\pagenumbering{arabic}\setcounter{page}{1}
+\renewcommand{\lastlineno}{0}
+\renewcommand{\shortcap}
+
+\title{\color{red}MathTeX.m }
+\author{\color{blue}Stellan \"Ostlund \\ Gothenburg University}
+\date{\color{green}\today}
+\maketitle
+\begin{abstract}
+The package {\tt MathTeX.m } enables {\tt TeX } output from Mathematica.
+\end{abstract}
+\newpage
+
+
+**)
+
+
+(**
+\section*{ General: }
+\begin{itemize}
+\item remove references to {\tt layout} and {\tt showframe} to remove visible page geometry
+\item the package {\tt listings} must be available
+\end{itemize}
+\section*{ Files:}
+\begin{itemize}
+\item {\tt mtexdemo.mtex  } which should be run with {\tt \$ math < mtexdemo.m  }
+\item {\tt MathTeX.m } which does the hard job and is run as a package.
+\item {\tt listings } is a directory which includes the listings macros
+\item {\tt mlistings.tex } is a file which loads som fragile listings commands
+\end{itemize}
+
+\section*{Example:}
+
+The file {\tt mtexdemo.mtex } should be run with the command
+
+{\tt \$ math < mtexdemo.mtex }
+
+It will generate two files, {\tt mtexdemo.tex } and {\tt mtexdemo.m }. 
+
+The file {\tt mtexdemo.tex } can be handled with the command {\tt pdflatex mtexdemo }
+whereas {\tt mtexdemo.m } is suitable as input to the command line interface in mathematica and
+has all the special {\tt mtex } constructions stripped. 
+
+\section*{Usage:}
+
+The easiest way to get the hang of it is
+to look at {\tt mtexdemo.tex } and compare it to tex output,
+mtexdemo.m and mtexdemo.tex to see what is going on.
+
+ **)
+(**
+This file is itself a demo using the {\tt MathTeX.m} hack.
+Special escapes are
+\begin{enumerate}
+\item  \begin{verbatim} ((((  expression )))) \end{verbatim} firsts lists `expression' then executes it resulting in a listing in the document
+\item  \begin{verbatim} (*(( expression ))*)  \end{verbatim}  lists  `expression'' but does not execute it  result
+\item  \begin{verbatim} (*$   lhs = TeX[ rhs ]  $*) \end{verbatim}    formats rhs and places between \$ signs resulting in an inline mathematical expression in the document
+\item  \begin{verbatim} (*[   lhs = TeX[ rhs ]  ]*) \end{verbatim}    formats rhs and places between [ ] signs resulting in an equation in the document
+\item  \begin{verbatim} (*!   lhs = TeX[ rhs ]  !*) \end{verbatim}    formats rhs and places between quotes so that it is interpreted as a latex expression rather than a math expression.
+\item an optional period or comma can precede the closing \$.
+\item \begin{verbatim} TeX[struct_] \end{verbatim} can be defined to override {\tt TeX } command
+\item \begin{verbatim} TeXFormat[ mybeta ] := "\\beta_{my} " \end{verbatim} specifies formatting
+\item \begin{verbatim} TeXFormat[ hh[a_,b_] ] := \...  \end{verbatim} would special format {\tt hh[x,y] }.
+\end{enumerate}
+**)
+(**
+The logic here is that the file should execute fine even if running  the math script
+without TeX; there should be no side effects from {\tt mtex} special constructions since
+they end up being parsed as comments.  Thus only type (1) expressions are actually executed 
+if {\tt TeX.m } is missing.  
+
+With {\tt TeX.m } two files are created; a {\tt .tex } file containing the {\tt TeX }
+code and a {\tt .m } file containing the mathematica code. These should be usable
+separately. Since debugging is more difficult with the {\tt .mtex } file this can be
+useful. 
+
+Note that if the file {\tt file.mtex } is input {\em inside } mathematica, the
+{\tt .mtex } commands are ignored. 
+
+The {\tt lhs = TeX[rhs] }  construction is somewhat fragile. {\tt lhs } should not be
+interpreted and {\tt lhs = } should be optional. The {\tt = } sign is fragile. 
+**)
+(** 
+First example (1). Note that the code is executed so that f and g acquire definitions.
+**)
+((((
+(* Here a simple bit of code *)
+f[x_] := Cos[ x ];
+g[x_] := Expand[ ( x - 3)^2 ];
+alpha = f[Pi/6 ];
+))))
+(**
+Here is a broken out equation, with an optional period at the end.
+**)
+
+(*[
+g[f[x] ] = TeX[ g[f[x]] ]
+.]*)
+
+(** Note that the construction {\tt lhs = rhs } does not put through {\tt lhs } through
+any tex parsing, so that it must be done explicitly **)
+
+(** \begin{itemize}
+	\item (3) **)
+	(*$ alpha  beta = TeX[ beta alpha] $*)
+(** \item (5) : **)
+	(** \begin{verbatim} **)
+	(*! alpha beta  = TeX[alpha beta ] !*)
+	(** \end{verbatim}  **)
+(** \item (4) : **)
+	(*[ \alpha \beta = TeX[alpha beta ] ]*)
+(** \end{itemize} **)
+
+(** Graphics in the commandline interface is a bit fragile.
+To have graphics output to screen, you must run the
+command {\tt << JavaGraphics` }. However this loads slowly
+and is not necessary when using the batch command. **)
+
+
+(** We now plot a simple figure and insert into the text. 
+Note that FigInsert and FigSave violate the rule that the mathematica
+file runs with or without TeX, since the functions are defined in TeX {\tt TeX }.
+**)
+
+gr = Plot[ Cos[x],{x,0,2 Pi }];
+FigSave["out.pdf", gr ]; 
+FigInsert["out.pdf",10,"here is the captin"];
+((((
+(* A small example showing that TeXForm is dumb *)
+(* It does not know how to format the variable mybeta  and the function hh *)
+sigma2  = Expand[ mybeta PauliMatrix[2]  + hh[pp,qq] PauliMatrix[3 ] ];
+))))
+(**
+**)
+
+(*[
+\sigma_2 = TeX[ sigma2 ]
+]*)
+
+((((
+(* We format the variable mybeta *)
+TeXFormat[mybeta] := "\\beta_{my}";
+TeXFormat[ hh[a_,b_] ] := "h_{"<>TeX[a]<>"}^{"<>TeX[b]<>"}"; 
+))))
+
+(*[
+\sigma_2 = TeX[ sigma2 ]
+]*)
+
+
+
+(**
+You can define yourself how {\tt TeX[ exp ] } handles {\tt exp }. 
+In this file, I simply put in {\tt TeX[ ex\_] :=  ToString[ TeXForm[ ex ]] ; }
+so that the program sends it to {\tt TeXForm }. You can instead intercept
+the expression and parse it as you like.  For example adding the lines below
+will intercept the handling of arrays. 
+**)
+((((
+(* Override TeXForm  for matrices *)
+
+ TeX[a_?MatrixQ] := Module[{exp,len,i},
+        len = Length[ a[[1]] ];
+        exp = "\\left[\\begin{array}{"<>StringJoin[Table["c",{Length[a[[1]] ] }]]<>"}\n";
+        Do[
+        Do[ exp = exp<>ToString[TeX[a[[i,j]]]]<>If[ j < len," & ",""], {j,1,len}];
+        If[ i < Length[a], exp = exp<>"\\\\\n"],{i,1,Length[a] }];
+        exp = exp<>"\n";
+        exp = exp<>"\\end{array}\\right]";
+        Return[exp];
+        ];
+))))
+(** Now print this again **)
+
+(*[
+\sigma_2 = TeX[ sigma2 ]
+]*)
+
+(** So now the matrix is intercepted and printed with square brackets instead. **)
+(** 
+\newpage
+\layout{}
+**)
+
+
+(** \end{document} **)
+

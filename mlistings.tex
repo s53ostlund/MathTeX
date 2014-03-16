@@ -1,0 +1,34 @@
+\definecolor{gray}{cmyk}{.005,.01,.2,.005}
+\newcommand{\shortcap}{}
+\newcommand{\lstsetcommand}{\lstset{framexleftmargin=2mm,breakindent=5pt,breaklines,backgroundcolor=\color{gray}}}
+% USE THE ONE BELOW FOR FILE NAME LISTINGS
+\newcommand{\lstlistingbegin}{
+	\lstsetcommand
+	\break
+	%\setlength{\parindent}{-.3cm}
+	\noindent
+	\begin{minipage}[t]{16cm} % XXX1 to force page keeps
+	\begin{lstlisting}[numbers=right,firstnumber=\lastlineno, linewidth=18cm, xleftmargin=0.2cm,  caption={[\shortcap]{ {\it \shortcap }
+		 {\bf \filename } % {
+			%\bf Section: \arabic{chapter}.\arabic{section}
+			% }
+		}
+	\hfill
+	% \newline
+	{{\it \hspace{4cm} \listingcaption } }}]
+}
+% USE THIS ONE BELOW FOR LISTINGS WITHOUT CAPTIONS
+%\newcommand{\lstlistingbegin}{
+%	\break
+%	\lstsetcommand
+%	\begin{minipage}[t]{16cm}
+%	\noindent 
+%}
+
+
+\newcommand{\lstlistingend}{
+	\end{minipage}  % XXX1 to force page keeps
+	\break}
+%\newcommand{\lstlistingend}{}
+%\newcommand{\filename}{klm.tex}
+\newcommand{\listingcaption}{}
